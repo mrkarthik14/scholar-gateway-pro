@@ -2,14 +2,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { UserRound, Building2, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [selectedRole, setSelectedRole] = useState<"student" | "admin">("student");
   const navigate = useNavigate();
   const { login } = useAuth();
   const { toast } = useToast();
@@ -23,13 +22,13 @@ const Login = () => {
       await new Promise((resolve) => setTimeout(resolve, 1500));
       
       if (username && password) {
-        login(selectedRole);
+        login();
         toast({
           title: "Success",
           description: "Welcome back! You've been successfully logged in.",
           className: "bg-success text-white",
         });
-        navigate(selectedRole === "admin" ? "/admin/dashboard" : "/student/dashboard");
+        navigate("/student/dashboard");
       } else {
         throw new Error("Please fill in all fields");
       }
@@ -57,35 +56,6 @@ const Login = () => {
         </div>
 
         <div className="bg-white p-8 rounded-lg shadow-lg space-y-6">
-          <div className="flex gap-4">
-            <button
-              onClick={() => setSelectedRole("student")}
-              className={`flex-1 p-4 rounded-lg border-2 transition-all ${
-                selectedRole === "student"
-                  ? "border-primary bg-primary/5"
-                  : "border-gray-200 hover:border-primary/30"
-              }`}
-            >
-              <UserRound className="w-6 h-6 mx-auto mb-2 text-primary" />
-              <span className="block text-sm font-medium text-secondary">
-                Student
-              </span>
-            </button>
-            <button
-              onClick={() => setSelectedRole("admin")}
-              className={`flex-1 p-4 rounded-lg border-2 transition-all ${
-                selectedRole === "admin"
-                  ? "border-primary bg-primary/5"
-                  : "border-gray-200 hover:border-primary/30"
-              }`}
-            >
-              <Building2 className="w-6 h-6 mx-auto mb-2 text-primary" />
-              <span className="block text-sm font-medium text-secondary">
-                Admin
-              </span>
-            </button>
-          </div>
-
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label

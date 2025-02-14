@@ -11,14 +11,14 @@ import {
 } from "lucide-react";
 
 const StudentDashboard = () => {
-  const { userRole, logout } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (userRole !== "student") {
+    if (!isAuthenticated) {
       navigate("/login");
     }
-  }, [userRole, navigate]);
+  }, [isAuthenticated, navigate]);
 
   const handleLogout = () => {
     logout();

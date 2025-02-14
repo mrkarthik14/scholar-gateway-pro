@@ -1,12 +1,9 @@
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-
-type UserRole = "student" | "admin" | null;
+import React, { createContext, useContext, useState } from "react";
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  userRole: UserRole;
-  login: (role: UserRole) => void;
+  login: () => void;
   logout: () => void;
 }
 
@@ -14,20 +11,17 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState<UserRole>(null);
 
-  const login = (role: UserRole) => {
+  const login = () => {
     setIsAuthenticated(true);
-    setUserRole(role);
   };
 
   const logout = () => {
     setIsAuthenticated(false);
-    setUserRole(null);
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, userRole, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
