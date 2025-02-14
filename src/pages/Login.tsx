@@ -28,7 +28,7 @@ const Login = () => {
           description: "Welcome back! You've been successfully logged in.",
           className: "bg-success text-white",
         });
-        navigate("/student/dashboard");
+        navigate("/admin/dashboard");
       } else {
         throw new Error("Please fill in all fields");
       }
@@ -48,10 +48,10 @@ const Login = () => {
       <div className="w-full max-w-md space-y-8 animate-fade-in">
         <div className="text-center">
           <h1 className="text-4xl font-display font-bold text-secondary mb-2">
-            Welcome Back
+            Admin Portal
           </h1>
           <p className="text-secondary/60">
-            Sign in to access your portal
+            Sign in to access your dashboard
           </p>
         </div>
 
