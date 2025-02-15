@@ -4,11 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("admissions");
+  const [password, setPassword] = useState("admissions");
   const navigate = useNavigate();
   const { login } = useAuth();
   const { toast } = useToast();
@@ -18,10 +19,22 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      if (username && password) {
+      const { data, error } = await supabase.auth.signUp({
+        email: `${email}@example.com`,
+        password: password,
+      });
+
+      if (error) {
+        // If signup fails, try to sign in (user might already exist)
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email: `${email}@example.com`,
+          password: password,
+        });
+
+        if (signInError) {
+          throw signInError;
+        }
+
         login();
         toast({
           title: "Success",
@@ -30,7 +43,13 @@ const Login = () => {
         });
         navigate("/admin/dashboard");
       } else {
-        throw new Error("Please fill in all fields");
+        login();
+        toast({
+          title: "Success",
+          description: "Account created and logged in successfully!",
+          className: "bg-success text-white",
+        });
+        navigate("/admin/dashboard");
       }
     } catch (error) {
       toast({
@@ -59,16 +78,16 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label
-                htmlFor="username"
+                htmlFor="email"
                 className="block text-sm font-medium text-secondary mb-1"
               >
                 Username
               </label>
               <input
-                id="username"
+                id="email"
                 type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                 placeholder="Enter your username"
               />
