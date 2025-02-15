@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState("admissions");
+  const [email, setEmail] = useState("admissions@admin.com");
   const [password, setPassword] = useState("admissions");
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -20,14 +20,14 @@ const Login = () => {
 
     try {
       const { data, error } = await supabase.auth.signUp({
-        email: `${email}@example.com`,
+        email: email,
         password: password,
       });
 
       if (error) {
         // If signup fails, try to sign in (user might already exist)
         const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-          email: `${email}@example.com`,
+          email: email,
           password: password,
         });
 
@@ -81,15 +81,15 @@ const Login = () => {
                 htmlFor="email"
                 className="block text-sm font-medium text-secondary mb-1"
               >
-                Username
+                Email
               </label>
               <input
                 id="email"
-                type="text"
+                type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                placeholder="Enter your username"
+                placeholder="Enter your email"
               />
             </div>
 
