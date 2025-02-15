@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -38,6 +37,28 @@ interface StudentData {
   remarks: string;
 }
 
+const GENDER_OPTIONS = ["Male", "Female", "Other"];
+const CASTE_OPTIONS = ["General", "OBC", "SC", "ST"];
+const SUBCASTE_OPTIONS = ["N/A", "A", "B", "C", "D", "E"];
+const NATIONALITY_OPTIONS = ["Indian", "Other"];
+const RELIGION_OPTIONS = ["Hindu", "Muslim", "Christian", "Sikh", "Buddhist", "Jain", "Other"];
+const STATE_OPTIONS = [
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", 
+  "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", 
+  "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", 
+  "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", 
+  "Uttar Pradesh", "Uttarakhand", "West Bengal"
+];
+const TOWN_OPTIONS = [
+  "Mumbai", "Delhi", "Bangalore", "Chennai", "Kolkata", "Hyderabad", "Pune", 
+  "Ahmedabad", "Surat", "Jaipur", "Other"
+];
+const COURSES_OPTIONS = [
+  "Computer Science", "Mechanical Engineering", "Electrical Engineering",
+  "Civil Engineering", "Electronics Engineering", "Information Technology",
+  "Chemical Engineering", "Biotechnology"
+];
+
 const StudentRegistrationForm = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -74,6 +95,19 @@ const StudentRegistrationForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const admissionDate = new Date(formData.dateOfAdmission);
+    const leavingDate = formData.dateOfLeaving ? new Date(formData.dateOfLeaving) : null;
+    
+    if (leavingDate && leavingDate <= admissionDate) {
+      toast({
+        title: "Error",
+        description: "Date of leaving must be after date of admission",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoading(true);
 
     try {
@@ -129,19 +163,34 @@ const StudentRegistrationForm = () => {
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    if (name === "dateOfTcIssued") {
+      const currentDate = new Date().toISOString().split('T')[0];
+      setFormData((prev) => ({
+        ...prev,
+        dateOfTcIssued: currentDate,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
+
+  useEffect(() => {
+    const currentDate = new Date().toISOString().split('T')[0];
+    setFormData(prev => ({
+      ...prev,
+      dateOfTcIssued: currentDate,
+    }));
+  }, []);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Basic Information */}
         <div className="space-y-2">
           <Label htmlFor="admissionNo">Admission No</Label>
           <Input
@@ -166,16 +215,23 @@ const StudentRegistrationForm = () => {
 
         <div className="space-y-2">
           <Label htmlFor="courses">Courses</Label>
-          <Input
+          <select
             id="courses"
             name="courses"
             value={formData.courses}
             onChange={handleChange}
             required
-          />
+            className="w-full px-3 py-2 border rounded-md"
+          >
+            <option value="">Select Course</option>
+            {COURSES_OPTIONS.map((course) => (
+              <option key={course} value={course}>
+                {course}
+              </option>
+            ))}
+          </select>
         </div>
 
-        {/* Name Information */}
         <div className="space-y-2">
           <Label htmlFor="studentName">Student Name</Label>
           <Input
@@ -220,7 +276,6 @@ const StudentRegistrationForm = () => {
           />
         </div>
 
-        {/* Contact Information */}
         <div className="space-y-2">
           <Label htmlFor="phoneNumber">Phone Number</Label>
           <Input
@@ -245,7 +300,6 @@ const StudentRegistrationForm = () => {
           />
         </div>
 
-        {/* Address Information */}
         <div className="space-y-2">
           <Label htmlFor="address1">Address Line 1</Label>
           <Input
@@ -279,27 +333,42 @@ const StudentRegistrationForm = () => {
 
         <div className="space-y-2">
           <Label htmlFor="town">Town</Label>
-          <Input
+          <select
             id="town"
             name="town"
             value={formData.town}
             onChange={handleChange}
             required
-          />
+            className="w-full px-3 py-2 border rounded-md"
+          >
+            <option value="">Select Town</option>
+            {TOWN_OPTIONS.map((town) => (
+              <option key={town} value={town}>
+                {town}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="state">State</Label>
-          <Input
+          <select
             id="state"
             name="state"
             value={formData.state}
             onChange={handleChange}
             required
-          />
+            className="w-full px-3 py-2 border rounded-md"
+          >
+            <option value="">Select State</option>
+            {STATE_OPTIONS.map((state) => (
+              <option key={state} value={state}>
+                {state}
+              </option>
+            ))}
+          </select>
         </div>
 
-        {/* Personal Information */}
         <div className="space-y-2">
           <Label htmlFor="dateOfBirth">Date of Birth</Label>
           <Input
@@ -314,59 +383,98 @@ const StudentRegistrationForm = () => {
 
         <div className="space-y-2">
           <Label htmlFor="gender">Gender</Label>
-          <Input
+          <select
             id="gender"
             name="gender"
             value={formData.gender}
             onChange={handleChange}
             required
-          />
+            className="w-full px-3 py-2 border rounded-md"
+          >
+            <option value="">Select Gender</option>
+            {GENDER_OPTIONS.map((gender) => (
+              <option key={gender} value={gender}>
+                {gender}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="nationality">Nationality</Label>
-          <Input
+          <select
             id="nationality"
             name="nationality"
             value={formData.nationality}
             onChange={handleChange}
             required
-          />
+            className="w-full px-3 py-2 border rounded-md"
+          >
+            <option value="">Select Nationality</option>
+            {NATIONALITY_OPTIONS.map((nationality) => (
+              <option key={nationality} value={nationality}>
+                {nationality}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="religion">Religion</Label>
-          <Input
+          <select
             id="religion"
             name="religion"
             value={formData.religion}
             onChange={handleChange}
             required
-          />
+            className="w-full px-3 py-2 border rounded-md"
+          >
+            <option value="">Select Religion</option>
+            {RELIGION_OPTIONS.map((religion) => (
+              <option key={religion} value={religion}>
+                {religion}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="caste">Caste</Label>
-          <Input
+          <select
             id="caste"
             name="caste"
             value={formData.caste}
             onChange={handleChange}
             required
-          />
+            className="w-full px-3 py-2 border rounded-md"
+          >
+            <option value="">Select Caste</option>
+            {CASTE_OPTIONS.map((caste) => (
+              <option key={caste} value={caste}>
+                {caste}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="subcaste">Subcaste</Label>
-          <Input
+          <select
             id="subcaste"
             name="subcaste"
             value={formData.subcaste}
             onChange={handleChange}
-          />
+            className="w-full px-3 py-2 border rounded-md"
+          >
+            <option value="">Select Subcaste</option>
+            {SUBCASTE_OPTIONS.map((subcaste) => (
+              <option key={subcaste} value={subcaste}>
+                {subcaste}
+              </option>
+            ))}
+          </select>
         </div>
 
-        {/* College Information */}
         <div className="space-y-2">
           <Label htmlFor="college">College</Label>
           <Input
@@ -398,10 +506,10 @@ const StudentRegistrationForm = () => {
             type="date"
             value={formData.dateOfLeaving}
             onChange={handleChange}
+            min={formData.dateOfAdmission}
           />
         </div>
 
-        {/* Additional Information */}
         <div className="space-y-2">
           <Label htmlFor="aadharNumber">Aadhar Number</Label>
           <Input
@@ -441,6 +549,7 @@ const StudentRegistrationForm = () => {
             type="date"
             value={formData.dateOfTcIssued}
             onChange={handleChange}
+            readOnly
           />
         </div>
 
