@@ -9,6 +9,15 @@ interface TCData {
   caste: string;
 }
 
+interface TCRecord {
+  id: string;
+  student_id: string;
+  admission_number: string;
+  file_name: string;
+  file_url: string;
+  created_at: string;
+}
+
 export const generateAndStoreTC = async (studentData: TCData) => {
   try {
     // Generate TC content (this is a basic example - customize as needed)
@@ -43,15 +52,21 @@ export const generateAndStoreTC = async (studentData: TCData) => {
       .from('transfer_certificates')
       .getPublicUrl(fileName);
 
-    // Store in local storage
-    const localTCs = JSON.parse(localStorage.getItem('transfer_certificates') || '[]');
-    localTCs.push({
-      studentId: studentData.studentId,
-      fileName,
-      url: publicUrl,
-      createdAt: new Date().toISOString(),
-    });
-    localStorage.setItem('transfer_certificates', JSON.stringify(localTCs));
+    // Store in database
+    const { data: tcRecord, error: dbError } = await supabase
+      .from('transfer_certificates')
+      .insert({
+        student_id: studentData.studentId,
+        admission_number: studentData.rollNumber,
+        file_name: fileName,
+        file_url: publicUrl,
+      })
+      .select()
+      .single();
+
+    if (dbError) {
+      throw new Error(`Failed to store TC record: ${dbError.message}`);
+    }
 
     return {
       fileName,
@@ -63,6 +78,17 @@ export const generateAndStoreTC = async (studentData: TCData) => {
   }
 };
 
-export const getStoredTCs = () => {
-  return JSON.parse(localStorage.getItem('transfer_certificates') || '[]');
+export const searchTC = async (admissionNumber: string, studentId: string): Promise<TCRecord | null> => {
+  const { data, error } = await supabase
+    .from('transfer_certificates')
+    .select()
+    .eq('admission_number', admissionNumber)
+    .eq('student_id', studentId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to fetch TC: ${error.message}`);
+  }
+
+  return data;
 };

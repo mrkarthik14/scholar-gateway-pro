@@ -21,6 +21,33 @@ export type Database = {
         }
         Relationships: []
       }
+      transfer_certificates: {
+        Row: {
+          admission_number: string
+          created_at: string | null
+          file_name: string
+          file_url: string
+          id: string
+          student_id: string
+        }
+        Insert: {
+          admission_number: string
+          created_at?: string | null
+          file_name: string
+          file_url: string
+          id?: string
+          student_id: string
+        }
+        Update: {
+          admission_number?: string
+          created_at?: string | null
+          file_name?: string
+          file_url?: string
+          id?: string
+          student_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
